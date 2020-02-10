@@ -33,6 +33,19 @@ module.exports = function (app) {
         });
     });
 
+      // Route for getting all Articles from the the db
+      app.get("/articles", function(req, res) {
+        // Grab all documents from Articles collection
+        db.Article.find({})
+        .then(function(dbArticle) {
+            // Send all articles to display
+            res.json(dbArticle);
+        })
+        // If error occurred, send to client
+        .catch(function(err) {
+            console.log(err);
+        });
+    });
 
     app.listen(PORT, function() {
         console.log(`App is running on PORT ${PORT}!`)
