@@ -60,6 +60,23 @@ module.exports = function (app) {
         });
     })
 
+    app.post("/articles/:id", function(req, res) {
+        // Create a new note to pass req.body to 
+        db.Note.create(req.body)
+        .then(function(dbNote) {
+            // If a Note is created, find the Article Id that matches req.params.id and update that associated Id to the new Note through 'note' ref
+            db.Article.findOneAndUpdate({_id: req.params.id}, {note: dbNote._id}, {new:true});
+        });
+            // If the article is updated successfully, create an asynch function that sends data to client
+        .then(function(dbArticle) {
+            res.json(dbArticle)
+        })
+            // If the article does not update, then catch error 
+        .catch(function(err) {
+            res.json(err)
+        });
+    });
+    
     app.listen(PORT, function() {
         console.log(`App is running on PORT ${PORT}!`)
     })
