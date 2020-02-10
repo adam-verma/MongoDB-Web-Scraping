@@ -47,6 +47,19 @@ module.exports = function (app) {
         });
     });
 
+     // Route for getting an Article by id
+     app.get("/articles/:id", function(req, res) {
+        db.Article.find({_id: req.params.id})
+        .populate("note")
+        // Send to client if query was successful
+        .then(function(dbArticle) {
+            res.json(dbArticle);
+        })
+        .catch(function(err) {
+            console.log(err); 
+        });
+    })
+
     app.listen(PORT, function() {
         console.log(`App is running on PORT ${PORT}!`)
     })
