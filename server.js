@@ -33,8 +33,8 @@ app.set("view engine", "handlebars");
 // Connect to Mongo DB
 mongoose.connect("mongodb://localhost/webscrapingdb", { useNewUrlParser: true });
 
+require("./controllers/app-controller.js")(app);
 // Start server
 app.listen(PORT, function() {
-    console.log("App running on port " + PORT + "!");
-  });
-  
+  console.log(`App is running on PORT ${PORT}!`)
+})
