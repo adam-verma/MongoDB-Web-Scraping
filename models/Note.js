@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
+let mongoose = require('mongoose');
 
 // Save a reference to the Schema constructor function
-const Schema = mongoose.Schema
+let Schema = mongoose.Schema
 
 // Create a new Schema object with constructor
 let NoteSchema = new Schema({
@@ -17,7 +17,7 @@ let NoteSchema = new Schema({
 })
 
 // Create model from mongoose's model scheme
-let Note = mongoose.models("Note", NoteSchema);
+let Note = mongoose.model("Note", NoteSchema);
 
 // Export the Note model 
 module.exports = Note;

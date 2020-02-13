@@ -1,21 +1,46 @@
-const mongoose = require('mongoose');
+var mongoose = require('mongoose');
 
 // Save a reference to the Schema constructor function
-const Schema = mongoose.Schema
+var Schema = mongoose.Schema
 
 // Create a new Schema object with constructor
 let ArticleSchema = new Schema({
+    _id: {
+        type: String,
+        required:true,
+    },
     // give 'headline' its properties
-    headline: {
+    name: {
         type: String,
         required: true
     },
     // give 'summary' its properties 
-    summary: {
+    address: {
         type: String, 
         required: true, 
         maxlength: 140,
     },
+    
+    phone: {
+        type: String,
+        required: true,
+    },
+
+    fees: { 
+        type: String,
+        required: true,
+    },
+
+    hours: {
+        type: String,
+        required: true
+    },
+
+    climate: {
+        type: String,
+        required: true
+    },
+
     // 'note' stores the ObjectId associated to Model
     // Populates 
     note: {
@@ -26,7 +51,7 @@ let ArticleSchema = new Schema({
 })
 
 // Create model from mongoose's model scheme
-let Article = mongoose.models("Article", ArticleSchema);
+var Article = mongoose.model("Article", ArticleSchema);
 
 // Export the Article model 
 module.exports = Article; 
