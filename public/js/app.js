@@ -18,6 +18,27 @@ $(document).on("click", "p", function() {
     // Make AJAX call for Article 
     $.ajax({
         method: "GET",
-
+        url: "/articles/" + articleId
     })
+
+    // Addd note information upon receiving from AJAX call
+    .then(function(data) {
+        console.log(data);
+        $("#notes").append(`<h2> ${data.name} </h2>`);
+         // An input to enter a new title
+        $("#notes").append(`<input id='titleinput' name='title'>`);
+        // A textarea to add a new note body
+        $("#notes").append(`<textarea id='bodyinput' name='body'>`);
+        // A button to submit a new note, with the id of the article saved to it
+        $("#notes").append(`<button data-id='${data._id}' id='savenote'> Save Note </button>`);
+        
+          // Checks for notes in article
+      if (data.note) {
+        // Fills the title to input 
+        $("#titleinput").val(data.note.title);
+        // Fills the boddy to textarea
+        $("#bodyinput").val(data.note.body);
+      }
+    });
 });
+
