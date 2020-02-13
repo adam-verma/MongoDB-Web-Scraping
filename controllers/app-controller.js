@@ -52,9 +52,10 @@ module.exports = function (app) {
                     //         console.log(err);
                     //     });
                     // Send a message to the client
-                    res.send("Scrape Complete");
+                       res.send("Scrape Complete");
                 });
         };
+     
     });
 
     // Route for getting all Articles from the the db

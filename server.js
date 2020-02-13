@@ -1,6 +1,7 @@
 // Dependencies
 const express = require('express');
 const mongoose = require("mongoose");
+const db = require('./models'); 
 
 const PORT = 3000; 
 
