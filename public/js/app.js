@@ -1,12 +1,29 @@
+$('ul li').on('click', function() {
+$('ul li').removeClass('active');  
+$('ul li').addClass('active'); 
+});
+
 // Get articles from route in JSON format 
 $.getJSON("/articles", function(res) {
     console.log(res);
     // Loop through the data array
     for (let i=0; i< res.length; i++) {
         // Display information on the page
-        $('#articles').append(`<p data-id= "${res._id}"> ${res[i].headline} <br/> ${res[i].summary} <br/> ${res[i].URL} </p>`);
+        $('.article-body').append(`<p data-id= "${res._id}"> ${res[i].name} <br/> ${res[i].address} <br/> ${res[i].phone} <br/> ${res[i].fees} <br/> ${res[i].hours} <br/> ${res[i].climate} </p>`);
     }
-})
+});
+
+$('#scrapeTab').on('click', function() {
+    $('#articles').empty(); 
+    $.ajax({method: "GET", url: "/scrape",}).then(function(results) {
+        location.reload();
+    })
+    .catch(function(error) {
+        console.log(error)
+    });
+});
+
+$('#noteBtn').on("click", function() {
 
 // Event listener for appended <p> tags in article
 $(document).on("click", "p", function() { 
@@ -31,6 +48,8 @@ $(document).on("click", "p", function() {
         $("#notes").append(`<textarea id='bodyinput' name='body'>`);
         // A button to submit a new note, with the id of the article saved to it
         $("#notes").append(`<button data-id='${data._id}' id='savenote'> Save Note </button>`);
+        // A button to delete a note with the id saved to it
+        $("#notes").append(`<button data-id='${data._id}' id='deletenote'> Delete Note </button>`);
         
           // Checks for notes in article
       if (data.note) {
@@ -41,6 +60,7 @@ $(document).on("click", "p", function() {
       }
     });
 });
+});
 
 // Upon clicking save note button
 $(document).on("click", "#savenote", function() {
@@ -50,11 +70,11 @@ $(document).on("click", "#savenote", function() {
     // POST request for change the note that is entered
     $.ajax({
         method: "POST",
-        url: "/articles" + articleId,
+        url: "/savedNote/" + articleId,
         data: {
             // Value from title input
             title: $('#titleinput').val(),
-            // Vale from note textarea
+            // Value from note textarea
             body: $('#bodyinput').val()
             
         }
@@ -69,4 +89,25 @@ $(document).on("click", "#savenote", function() {
     $('#titleinput').val("");
     $('#bodyinput').val("");
 });
+
+$(document).on("click", "deletenote", function() {
+    const articleId = $(this).attr("data-id");
+      // POST request for change the note that is entered
+      $.ajax({
+        method: "POST",
+        url: "/deleteArticle/" + articleId,
+        data: {
+            // Value from title input
+            title: $('#titleinput').val(),
+            // Value from note textarea
+            body: $('#bodyinput').val()
+        }
+    }) 
+    .then(function(response) {
+        location.reload();
+    });
+
+})
+
+
 

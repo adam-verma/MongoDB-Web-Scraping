@@ -5,42 +5,42 @@ var Schema = mongoose.Schema
 
 // Create a new Schema object with constructor
 let ArticleSchema = new Schema({
-    _id: {
-        type: String,
-        required:true,
-    },
     // give 'headline' its properties
     name: {
         type: String,
-        required: true
+        required: false
     },
     // give 'summary' its properties 
     address: {
         type: String, 
-        required: true, 
+        required: false, 
         maxlength: 140,
     },
     
     phone: {
         type: String,
-        required: true,
+        required: false,
     },
 
     fees: { 
         type: String,
-        required: true,
+        required: false,
     },
 
     hours: {
         type: String,
-        required: true
+        required: false
     },
 
     climate: {
         type: String,
-        required: true
+        required: false,
     },
 
+    saved: {
+        type: Boolean,
+        default: false, 
+    },
     // 'note' stores the ObjectId associated to Model
     // Populates 
     note: {
