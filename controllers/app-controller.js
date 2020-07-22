@@ -1,6 +1,8 @@
 // Gather dependencies
 const axios = require('axios');
 const cheerio = require('cheerio');
+const mongoose = require('mongoose');
+const ObjectId = require('mongodb').ObjectID;
 
  // Require models
  let db = require("../models/");
@@ -13,109 +15,106 @@ module.exports = function (app) {
         axios.get("https://tpwd.texas.gov/state-parks/nearby/all-parks").then(function (response) {
             // Use cheerio to load and store the links for further scraping
             let $ = cheerio.load(response.data);
-
+            console.log($);
             let urlArr = [];
             $(".external-link").each(function (index) {
                 if ($(this).parent().attr("href")) {
                     urlArr.push($(this).parent().attr("href"))
                 }
             });
-            console.log(urlArr);
+            urlArr = urlArr.filter(function(arr){ 
+                return arr !== undefined
+            })
 
             // ScrapePages(url).reduce((prev, urlArr) => prev.then(
             //     () => ScrapePages(url).add(urlArr),
             // ), Promise.resolve());
 
-            const scrapeLinks = urlArr.map(ScrapePages);    
-            res.send("Scrape Complete");
-        });
-    });
-
-        // 
-        function ScrapePages(url) {
-            axios.get(url)
-                .then(function (response) {
-                    let $ = cheerio.load(response.data);
-                    let parkInfo = {};
-                    parkInfo.name = $('#parkheader').find("#sp_title").children().children("a").text().replace(/[\n\r]\s+/gi, ' ').trim();
-                    $('#right-column').each(function (i, element) {
-                        parkInfo.address = $(this).find("address").text().replace(/(\r\n|\n|\r|\t|\s+)/gm, ' ').trim();
-                        parkInfo.phone = $(this).find(".park_phone").children("p").text().replace(/(\r\n|\n|\r|\t|\s+)/gm, ' ');
-                        parkInfo.fees = $(this).children().children("#parkfees").children(".rowcontent").children("ul").children("li").text().replace(/(\r\n|\n|\r|\t|\s+)/gm, ' ').trim();
-                        parkInfo.hours = $(this).children().children("#parkhours").children().children("p").text().replace(/(\r\n|\n|\r|\t|\s+)/gm, ' ').trim();
-                        parkInfo.climate = $(this).children().children("#parkclimate").children().children("p").text().replace(/[\n\r]\s+/gi, ' ').trim();
-                    })
-                    console.log(parkInfo);
-
-                    // Create a new Article using the `parkInfo` object built from scraping
-                    db.Article.create(parkInfo)
-                        .then(function (dbArticle) {
-                            // View the added result in the console
-                            console.log(dbArticle);
+            let promises = [];
+            urlArr.forEach(url =>  {
+                promises.push(new Promise((resolve, reject) => {
+                    axios.get(url)
+                    .then(function (response) {
+                        let $ = cheerio.load(response.data);
+                        let parkInfo = [];
+                        parkInfo.name = $('#parkheader').find("#sp_title").children().children("a").text().replace(/[\n\r]\s+/gi, ' ').trim();
+                        parkInfo.image = $('.orbit-image').attr('src');
+                        $('#right-column').each(function (i, element) {
+                            parkInfo.address = $(this).find(".address").text().replace(/(\r\n|\n|\r|\t|\s+)/gm, ' ').trim();
+                            parkInfo.phone = $(this).find(".park_phone").children("p").text().replace(/(\r\n|\n|\r|\t|\s+)/gm, ' ');
+                            parkInfo.fees = $(this).children().children("#parkfees").children(".rowcontent").children("ul").children("li").text().replace(/(\r\n|\n|\r|\t|\s+)/gm, ' ').trim();
+                            parkInfo.hours = $(this).children().children("#parkhours").children().children("p").text().replace(/(\r\n|\n|\r|\t|\s+)/gm, ' ').trim();
+                            parkInfo.climate = $(this).children().children("#parkclimate").children().children("p").text().replace(/[\n\r]\s+/gi, ' ').trim();
                         })
-                        .catch(function (err) {
-                            console.log(err);
-                        });
-                    // Send a message to the client
-                     
-                });
-        };
-      
+                        if (parkInfo.name !== "" && parkInfo.image !="" && parkInfo.address !== "" && parkInfo.phone !== "" && parkInfo.fees !== "" && parkInfo.hours !== "" && parkInfo.climate !== "" ) {
+                            parkInfo.push(parkInfo);
+                        }
+                        // Send a message to the client
+                        return resolve(parkInfo)
+                    })
+                }))
+            });
+
+            Promise.all(promises)
+            .then((results) => {
+                // Create a new Article using the `parkInfo` object built from scraping
+                db.Article.create(results, function(err, parkname) {
+                    // If duplicate error code, then find duplicate by name and filter out 
+                    if (err && err.code === 11000) {
+                        console.log('found dups');
+                        return db.Article.find({name: results.name}).exec()
+                    }
+                    else {
+                        console.log('new article created', results.name);
+                    }  
+                })
+                return res.redirect('/')
+            })
+        })
+    })
+
       // Grabs all articles that are not saved and renders to the index.html
       app.get("/", function(req, res){
-        db.Article.find({saved: false})
-        .then(function(result){
-            const hbsObj = {articles: result};
-            res.render("index", hbsObj);
+        db.Article.find({saved: false}).lean()
+        .then(result => {
+                const hbsObj = {articles: result};
+                console.log(`hbs: ${hbsObj}`);
+                res.render("index", hbsObj);
+            })
+        .catch(err => {
+            console.log(err)
         })
-        .catch(function(err) { 
-            res.json(err);
-        });
     });
-
 
     // Grabs all saved articles attached with notes and renders to the saved page 
     app.get("/saved", function(req, res) {
-        db.Article.find({saved: true})
+        db.Article.find({saved: true}).lean()
         .sort({date: -1})
         .populate("note")
         .then(function(dbArticle) {
-            const hbsObj = {savedArticle: dbArticle};
-            res.render('index', hbsObj);
+            const savedObj = {savedArticle: dbArticle};
+            res.render('saved', savedObj);
         })
         .catch(function(err) {
             res.json(err)
         });
     });
 
-    app.post("/savedArticle/:id", function(req, res) {
+    app.put("/saved/:id", function(req, res) {
         db.Article.findOneAndUpdate({
-            _id: req.params.id
-        }, {saved: true})
+            _id: ObjectId(req.params.id)
+        }, {$set: {saved: true}})
         .then(function(savedArticle) {
-            res.json(savedArticle)
+            console.log('good job')
+            res.redirect('/');
         })
         .catch(function(err) {
             console.log(err);
         })
         })
-    
-    // Route for getting all Articles from the the db
-    app.get("/articles", function (req, res) {
-        // Grab all documents from Articles collection
-        db.Article.find(req.query)
-            .then(function (dbArticle) {
-                // Send all articles to display
-                res.json(dbArticle);
-            })
-            // If error occurred, send to client
-            .catch(function (err) {
-                console.log(err);
-            });
-    });
 
     // Route for getting an Article by id
-    app.get("/articles/:id", function (req, res) {
+    app.get("/saved/:id", function (req, res) {
         db.Article.find({
                 _id: req.params.id
             })
@@ -132,17 +131,28 @@ module.exports = function (app) {
     // Use a post route to delete specified article
     app.post("/deleteArticle/:id", function(req, res){
       
-        db.Article.findOneAndRemove({
+        db.Article.findOneAndUpdate({
             _id: req.params.id
-        })
+        }, {$set: {saved: false}})
         .then(function() {
             return db.Note.remove({});
         })
         .then(function(results) {
-            res.json(results);
+            res.redirect('/saved');
         })
         .catch(function(err) { 
             res.json(err) 
+        });
+    });
+
+    // Use a post route to delete all articles
+    app.delete("/deleteArticles", function(req, res) {
+        db.Article.deleteMany({})
+        .then(function(deletedArticles) {
+            res.send(deletedArticles)
+        })
+        .catch(function(err) {
+            res.json(err)
         });
     });
 

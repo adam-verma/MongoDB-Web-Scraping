@@ -1,113 +1,97 @@
-$('ul li').on('click', function() {
-$('ul li').removeClass('active');  
-$('ul li').addClass('active'); 
-});
+$(document).ready(function() { 
 
-// Get articles from route in JSON format 
-$.getJSON("/articles", function(res) {
-    console.log(res);
-    // Loop through the data array
-    for (let i=0; i< res.length; i++) {
-        // Display information on the page
-        $('.article-body').append(`<p data-id= "${res._id}"> ${res[i].name} <br/> ${res[i].address} <br/> ${res[i].phone} <br/> ${res[i].fees} <br/> ${res[i].hours} <br/> ${res[i].climate} </p>`);
-    }
-});
+// Toggle nav link to active based on href
+$('.navbar-nav a').each( function(e) {
+    // Remove previously set active class
+    $(this).removeClass('active');
+    // Define the href variable for every <a>
+    const href = $(this).attr('href');
+    // Define the window path once link is clicked
+    const path = window.location.pathname;
+    // Apply an "active" class to link 
+    $(this).toggleClass('active', href === path);
+})
 
-$('#scrapeTab').on('click', function() {
+// Toggle the collapse to show or hide the card body
+$(document).on('click', '[data-toggle=collapse]', function(e) {
+    e.preventDefault();
+    // Capture the data-parent attribute of collapsible button
+    let parent_id = $(this).data('parent');
+
+    // Obtain collapsible element's selector from parent to set default to hide  
+    $(parent_id+' .card .row .article-body').collapse('hide');
+
+    // Find the targeted element to toggle collapse
+    let target = $(this).parents('.list-item').find('.article-body');
+    target.collapse('toggle');
+})
+
+$(document).on('click', '#saveBtn', saveArticle);
+$(document).on('click', '.showParks', getParks);
+$(document).on('click', '#scrapeTab', scrapeData);
+$(document).on('click', '#clearAllBtn', deleteAll);
+$(document).on('click', '.name', toggleParks);
+
+function scrapeData(e) {
+    e.preventDefault();
     $('#articles').empty(); 
-    $.ajax({method: "GET", url: "/scrape",}).then(function(results) {
+    console.log('scrap');
+    window.location.origin;
+    $.ajax({method: "GET", url: "/scrape"})
+    .then(function(results) {
         location.reload();
     })
     .catch(function(error) {
         console.log(error)
     });
-});
+};
 
-$('#noteBtn').on("click", function() {
-
-// Event listener for appended <p> tags in article
-$(document).on("click", "p", function() { 
-    // Clear out the notes from note section to avoid repeated ones
-    $('#notes').empty(); 
-    // Grab the id from <p> tag
+function saveArticle(e) {
+    e.preventDefault();
     const articleId = $(this).attr("data-id");
+    console.log(`articleId: ${articleId}`);
+    const savedArticle = $(this).data(); 
+    savedArticle.saved = true; 
+    $(this).parents('.list-item').remove();
 
-    // Make AJAX call for Article 
-    $.ajax({
-        method: "GET",
-        url: "/articles/" + articleId
+    $.ajax({method: "PUT", url: "/saved/"+ articleId, data: JSON.stringify(savedArticle),
+    success: function () {
+        console.log(`savedArticle: ${savedArticle}`);
+        window.location.origin;
+    },
+    error: function (error) {
+        console.log(error)
+    }
     })
+}
 
-    // Addd note information upon receiving from AJAX call
-    .then(function(data) {
-        console.log(data);
-        $("#notes").append(`<h2> ${data.name} </h2>`);
-         // An input to enter a new title
-        $("#notes").append(`<input id='titleinput' name='title'>`);
-        // A textarea to add a new note body
-        $("#notes").append(`<textarea id='bodyinput' name='body'>`);
-        // A button to submit a new note, with the id of the article saved to it
-        $("#notes").append(`<button data-id='${data._id}' id='savenote'> Save Note </button>`);
-        // A button to delete a note with the id saved to it
-        $("#notes").append(`<button data-id='${data._id}' id='deletenote'> Delete Note </button>`);
-        
-          // Checks for notes in article
-      if (data.note) {
-        // Fills the title to input 
-        $("#titleinput").val(data.note.title);
-        // Fills the boddy to textarea
-        $("#bodyinput").val(data.note.body);
-      }
+function getParks(e) {
+    e.preventDefault();
+    $.ajax({method: "GET", url: "/articles",}).then(function(results) {
+        window.location.href = "/"
+    })
+    .catch(function(error) {
+        console.log(error)
     });
-});
-});
+}
 
-// Upon clicking save note button
-$(document).on("click", "#savenote", function() {
-    // Grab the id associated with the Article;
-    const articleId = $(this).attr("data-id");
+function toggleParks() {
+    $(this).first().removeClass('.collapsed');
+    $('.article-body').first().addClass('in');
+}
 
-    // POST request for change the note that is entered
-    $.ajax({
-        method: "POST",
-        url: "/savedNote/" + articleId,
-        data: {
-            // Value from title input
-            title: $('#titleinput').val(),
-            // Value from note textarea
-            body: $('#bodyinput').val()
-            
-        }
-    }) 
-    .then(function(response) {
-        // Console the response 
-        console.log(response);
-        $("#notes").empty();
-    });
-
-    // Then clear the values entered in the input and textarea after saving 
-    $('#titleinput').val("");
-    $('#bodyinput').val("");
-});
-
-$(document).on("click", "deletenote", function() {
-    const articleId = $(this).attr("data-id");
-      // POST request for change the note that is entered
-      $.ajax({
-        method: "POST",
-        url: "/deleteArticle/" + articleId,
-        data: {
-            // Value from title input
-            title: $('#titleinput').val(),
-            // Value from note textarea
-            body: $('#bodyinput').val()
-        }
-    }) 
-    .then(function(response) {
+function deleteAll(e) {
+    e.preventDefault();
+    $.ajax({method: "DELETE", url: "/deleteArticles"})
+    .then(function(results) {
         location.reload();
+        $('#articles').empty(); 
+    })
+    .catch(function(error) {
+        console.log(error)
     });
 
-})
+    return false;
+};
 
-
-
+});

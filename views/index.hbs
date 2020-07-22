@@ -8,7 +8,7 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li id="mainTab" class="nav-item" >
-                <a id="nav-link" href="/">Home </a>
+                <a class="nav-link" href="/">Home </a>
             </li>
             <li id="scrapeTab" class="nav-item">
                 <a class="nav-link" href="/scrape">Scrape</a>
@@ -16,51 +16,77 @@
             <li id="saveTab" class="nav-item">
                 <a class="nav-link" href="/saved">Saved List</a>
             </li>
-            {{#if savedArticle}}
             <li class="nav-item">
-            <a class="btn btn-danger" id="clearBtn">Clear All Park Info</a>
+            <a class="btn btn-danger" id="clearAllBtn">Clear All Park Info</a>
             </li>
-            {{/if}}
         </ul>
     </div>
 </nav>
 
 <div class="container">
-    <div class="row">
-        <div id="articles">
-            {{#each articles}}
-            <div class="card" data-id="{{this._id}}">
-            <div class="card-header">
-                <h4>
-                <a class="article" href="">{{this.name}}</a>    
-                <a class="btn btn-danger" id="removeBtn">Remove from Saved</a>
-                <a class="btn btn-info" id="noteBtn">Add Note to Park</a> 
-                </h4>
+    <div class="row align-items-center">
+        <div class="col-md-6 col-md-6">
+            <!-- Park List Dropdown -->
+            {{#if articles}}
+            <div id="articles">
+                <ul class="menu">
+                    {{#each articles}}
+                        <li class="list-item">
+                            <!-- Park Card -->
+                            <div class="card">
+                                    <!-- Park Header -->
+                                    <div class="row park-header">
+                                        <!-- Park Name --> 
+                                        <h4 class="card-header name">
+                                            {{this.name}}
+                                        </h4>
+                                        <!-- Park Image -->
+                                        <img class="parkpic" src={{this.image}} />
+                                        <i class="fa fa-arrow-circle-down expand-button" type="button" data-toggle="collapse" data-parent=".list-item" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="row">
+                                        <!-- Collapsible Article Info -->
+                                        <div class="article-body card-body collapse" data-id={{this._id}}>
+                                            <div id="contact"> 
+                                            
+                                            <h6>{{this.phone}}</h6>
+                                            <h6>{{this.address}}</h6>
+                                            </div>
+                                            <h4>
+                                            <a class="article" href=""></a>   
+                                            <a class="btn btn-success" id="saveBtn" data-id={{this._id}}>Save Park</a>
+                                            </h4>
+                                        </div>
+                                    </div>
+                            </div>
+                        </li>
+                    {{/each}}
+                </ul>
             </div>
-            <div class="article-body card-body">
+            {{else}}
+            <div class="alert alert-info text-center" role="alert">
+                <h3> 
+                No Parks have been scraped.
+                </h3>
             </div>
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3>Click Here to Browse Scraped Available Texas Parks</h3>
+                </div>
+                <div class="card-body text-center">
+                    <h4 class="showParks">
+                    <a href="/">Browse Park Info</a>
+                    </h4> 
+                </div>
             </div>
-            {{/each}}
-        {{#unless articles.length}}
-        <div class="alert alert-info text-center" role="alert">
-            <h3> 
-            No Parks have been saved.
-            </h3>
+            {{/if}}
+            </div>
         </div>
-        <div class="card">
-            <div class="card-header text-center">
-                <h3>Click Here to Browse Scraped Available Texas Parks</h3>
-            </div>
-            <div class="card-body text-center">
-                <h4>
-                <a href="/">Browse Park Info</a>
-                </h4> 
-            </div>
-        </div>
-        {{/unless}}
-        </div>
-        <footer class="footer"> 
+        <footer class="footer" style="vertical-align: text-bottom"> 
             <h5>Texas Parks MongoDB Scraper</h5> 
         </footer>
     </div>
 </div>
+
+
+    

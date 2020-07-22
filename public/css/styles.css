@@ -1,0 +1,55 @@
+    nav a {
+    text-decoration: none !important;
+    }
+
+    .dropdown-menu {
+        display: block;
+        margin-top: 2%; 
+        list-style: none;
+    }
+
+    .list-item {
+        list-style: none;
+        position: relative;
+        text-align: center;
+        width: 350px;
+        height: auto;
+        margin: 5% auto;
+    }
+
+    .row {
+        display: flex;
+        }
+
+    .col-md-6 {
+        float: left;
+        flex: 50%;
+    }
+    .park-header {
+        position: relative;
+        height: auto;
+
+        width: 300px;
+    }
+    
+    .parkpic {
+        position: relative;
+        height: 150px;
+        width: 100%;
+    }
+
+    .expand-button {
+        color: black;
+        fill: green;
+        transform: scale(1.5);
+        position: absolute;
+        bottom: -4%;
+        right: 0;
+        left: 0;
+        margin: 0 auto;
+        padding-bottom: 0%;
+    }
+
+    .expand-button:hover {
+        color: forestgreen;
+    }
