@@ -2,7 +2,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const mongoose = require('mongoose');
-const ObjectId = require('mongodb').ObjectID;
 
  // Require models
  let db = require("../models/");
@@ -26,10 +25,6 @@ module.exports = function (app) {
                 return arr !== undefined
             })
 
-            // ScrapePages(url).reduce((prev, urlArr) => prev.then(
-            //     () => ScrapePages(url).add(urlArr),
-            // ), Promise.resolve());
-
             let promises = [];
             urlArr.forEach(url =>  {
                 promises.push(new Promise((resolve, reject) => {
@@ -37,6 +32,7 @@ module.exports = function (app) {
                     .then(function (response) {
                         let $ = cheerio.load(response.data);
                         let parkInfo = [];
+                        parkInfo.url = url;
                         parkInfo.name = $('#parkheader').find("#sp_title").children().children("a").text().replace(/[\n\r]\s+/gi, ' ').trim();
                         parkInfo.image = $('.orbit-image').attr('src');
                         $('#right-column').each(function (i, element) {
@@ -102,7 +98,7 @@ module.exports = function (app) {
 
     app.put("/saved/:id", function(req, res) {
         db.Article.findOneAndUpdate({
-            _id: ObjectId(req.params.id)
+            _id: req.params.id
         }, {$set: {saved: true}})
         .then(function(savedArticle) {
             console.log('good job')
@@ -119,25 +115,26 @@ module.exports = function (app) {
                 _id: req.params.id
             })
             .populate("note")
-            // Send to client if query was successful
-            .then(function (dbArticle) {
-                res.json(dbArticle);
-            })
-            .catch(function (err) {
-                console.log(err);
-            });
+        // Send to client if query was successful
+        .then(function (dbArticle) {
+            res.json(dbArticle);
+        })
+        .catch(function (err) {
+            console.log(err);
+        });
     })
 
     // Use a post route to delete specified article
-    app.post("/deleteArticle/:id", function(req, res){
+    app.put("/deleteArticle/:id", function(req, res){
       
         db.Article.findOneAndUpdate({
-            _id: req.params.id
+            _id: req.params.id, 
         }, {$set: {saved: false}})
         .then(function() {
             return db.Note.remove({});
         })
-        .then(function(results) {
+        .then(function() {
+            console.log('deleted')
             res.redirect('/saved');
         })
         .catch(function(err) { 
@@ -157,26 +154,29 @@ module.exports = function (app) {
     });
 
     app.post("/savedNote/:id", function (req, res) {
+        console.log(req.body);
+        console.log('id'+req.params.id);
         // Create a new note to pass req.body to 
         db.Note.create(req.body)
             .then(function (dbNote) {
+                console.log('NoteId: '+dbNote._id);
                 // If a Note is created, find the Article Id that matches req.params.id and update that associated Id to the new Note through 'note' ref
-                db.Article.findOneAndUpdate({
+                return db.Article.findOneAndUpdate({
                     _id: req.params.id
                 }, {
-                    note: dbNote._id
+                    note: dbNote._id, 
                 }, {
                     new: true
                 });
             })
-            // If the article is updated successfully, create an asynch function that sends data to client
-            .then(function (dbArticle) {
-                res.json(dbArticle)
-            })
-            // If the article does not update, then catch error 
-            .catch(function (err) {
-                res.json(err)
-            });
+                // If the article is updated successfully, create an asynch function that sends data to client
+                .then(function (dbArticle) {
+                    console.log(dbArticle)
+                })
+                // If the article does not update, then catch error 
+                .catch(function (err) {
+                    res.json(err)
+                });
     });
     
     // app.post("/deletedNote/:id", function(req, res) {
