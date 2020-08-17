@@ -13,7 +13,6 @@ let NoteSchema = new Schema({
     body: {
         type: String
     }
-
 })
 
 // Create model from mongoose's model scheme

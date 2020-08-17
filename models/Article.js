@@ -5,6 +5,11 @@ var Schema = mongoose.Schema
 
 // Create a new Schema object with constructor
 let ArticleSchema = new Schema({
+    url: {
+        type: String,
+        required: true,
+        unique: true
+    },
     // give 'name' its properties
     name: {
         type: String,
