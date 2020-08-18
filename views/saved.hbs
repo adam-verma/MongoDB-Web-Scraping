@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="#">Navbar</a>
+    <a class="navbar-brand" href="#">Park Scraper</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -10,11 +10,11 @@
             <li id="mainTab" class="nav-item" >
                 <a class="nav-link" href="/">Home </a>
             </li>
-            <li id="scrapeTab" class="nav-item">
-                <a class="nav-link" href="/scrape">Scrape</a>
-            </li>
             <li id="saveTab" class="nav-item">
                 <a class="nav-link" href="/saved">Saved List</a>
+            </li>
+            <li id="scrapeTab" class="nav-item">
+                <a class="btn btn-success" href="/scrape">Scrape</a>
             </li>
             {{#if savedArticle}}
             <li class="nav-item">
@@ -24,6 +24,15 @@
         </ul>
     </div>
 </nav>
+
+<div class="overlay"> 
+    <div class="home-title">
+        <h1> Mongo Scraper: Texas Parks Catalog</h1>
+        <p> View Saved Parks </p>
+    </div>
+    <div class="background-image">
+    </div>
+</div>
 
 <div class="container">
     <div class="row">
@@ -42,11 +51,15 @@
                             <h5>{{this.address}}</h5>
                             </div>
                             <h4>
-                            <a class="article" href=""></a>   
+                            <a class="article" href=></a>   
                             <a class="btn btn-danger" id="removeBtn" data-id={{this._id}}>Remove from Saved</a>
                             <a class="btn btn-info noteBtn" data-id={{this._id}}>Add Note to Park</a>
                             </h4>
-                            <p id="notes"></p>
+                            <form id="new-note"></form>
+                            <p id="notes">
+                                <h6>{{this.note.title}}</h6>
+                                <p>{{this.note.body}}</p>
+                            </p>
                         </div>
                     </div>
                 </li>
