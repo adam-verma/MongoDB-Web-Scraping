@@ -42,13 +42,29 @@
                 <!-- Park List Dropdown --> 
                 <li class="list-item">
                     <div class="card" data-id={{this._id}}>
-                        <div class="card-header">
-                            {{this.name}}
-                        </div>  
-                        <div class="article-body card-body">
+                        <!-- Park Header -->
+                        <div class="park-header">
+                            <!-- Park Name --> 
+                            <a class="park-url" href={{this.url}}>
+                                <h4 class="card-header name">
+                                    {{this.name}}
+                                </h4>
+                            </a>
+                            <!-- Park Image -->
+                            <img class="parkpic" src={{this.image}} />
+                            <i class="fa fa-arrow-circle-down expand-button" type="button" data-toggle="collapse" data-parent=".list-item" aria-hidden="true"></i>
+                        </div>
+                        <div class="article-body card-body collapse">
                             <div id="contact"> 
-                            <h4>{{this.phone}}</h4>
-                            <h5>{{this.address}}</h5>
+                                <h5>Contact Details</h5> 
+                                <p>Phone: {{this.phone}}</p>
+                                <p>Address: {{this.address}}</p>
+                            </div>
+                            <div id="park-details">
+                                <h5>Additional Park Info</h5>
+                                <p>Fees: {{this.fees}}</p>
+                                <p>Hours: {{this.hours}}</p> 
+                                <p>Average Weather: {{this.climate}}</p>
                             </div>
                             <h4>
                             <a class="article" href=></a>   
