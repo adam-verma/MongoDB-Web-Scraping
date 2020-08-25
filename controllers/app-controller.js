@@ -42,7 +42,7 @@ module.exports = function (app) {
                             parkInfo.hours = $(this).children().children("#parkhours").children().children("p").text().replace(/(\r\n|\n|\r|\t|\s+)/gm, ' ').trim();
                             parkInfo.climate = $(this).children().children("#parkclimate").children().children("p").text().replace(/[\n\r]\s+/gi, ' ').trim();
                         })
-                        if (parkInfo.name !== "" && parkInfo.image !="" && parkInfo.address !== "" && parkInfo.phone !== "" && parkInfo.fees !== "" && parkInfo.hours !== "" && parkInfo.climate !== "" ) {
+                        if (parkInfo.name !== "" && parkInfo.image !== "" && parkInfo.address !== "" && parkInfo.phone !== "" && parkInfo.fees !== "" && parkInfo.hours !== "" && parkInfo.climate !== "" ) {
                             parkInfo.push(parkInfo);
                         }
                         // Send a message to the client
