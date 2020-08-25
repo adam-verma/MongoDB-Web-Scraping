@@ -67,7 +67,7 @@ function saveArticle(e) {
 
 function getParks(e) {
     e.preventDefault();
-    $.ajax({method: "GET", url: "/articles",}).then(function(results) {
+    $.ajax({method: "GET", url: "/",}).then(function(results) {
         window.location.href = "/"
     })
     .catch(function(error) {
